@@ -1,22 +1,22 @@
 
-	
-// let img;
-let x = 90; //30 = Mittelpunkt des ersten rect, 10 = Feldrand
-let y = 90;
-let end = y + 530;
+let x = 640; //30 = Mittelpunkt des ersten rect, 10 = Feldrand
+let y = 200;
+let x_min = 420;
+let y_min = 160;
+let bg_x_mid = 660;
+let bg_y_mid = 450;
 let playing_angle = 0;
 let blocks = ["Q", "T", "L", "I", "Z", "mZ", "mL"];
 let playing_block = "";
 let next_block = "";
-// let click; //SOUND
-// let looper1;
+
 //10000 = 10sec/1000 = 1sec => Zeit bis Block eins weiter fällt
 let timer = 0;
 let interval = 0;
 //png augen timer
-let interval_yellow = window.setInterval(show_red, 5000);
+let interval_yellow = window.setInterval(show_yellow, 5000);
 let trigger_yellow = false;
-let interval_red = window.setInterval(show_yellow, 4000);
+let interval_red = window.setInterval(show_red, 4000);
 let trigger_red = false;
 let block_landed = false;
 let started = 0;
@@ -25,89 +25,55 @@ let score = 0;
 let paused = false;
 let collide = [];
 let fallen_blocks = [];
-   
-// function setup() {
-//   createCanvas(600, 600);
-   
-// }
-// function preload() {
-//   img = loadImage('tetris background lvl1.jpg');
-// }
-// function setup() {
-//   image(img, width, height);
-// }
  
- 
-//SOUND:
- 
-// function preload() {
-//   click = loadSound('assets/drum.mp3');
-// }
- 
-// function setup() {
-//   //the looper's callback is passed the timeFromNow
-//   //this value should be used as a reference point from
-//   //which to schedule sounds
-//   looper1 = new p5.SoundLoop(function(timeFromNow){
-//     click.play(timeFromNow);
-//     background(255 * (looper1.iterations % 2));
-//     }, 2);
- 
-//   //stop after 10 iteratios;
-//   looper1.maxIterations = 10;
-//   //start the loop
-//   looper1.start();
-// }
-  
+
 function draw() {
   rectMode(CENTER);
   clear();
-  image(img,0,0, windowWidth, windowHeight);
- 
-  //Spielfläche hinterlegen
+  //image(img,0,0, windowWidth, windowHeight);
+  image(img, 0, 0, 1294 , 920);
+  
   push();
+  //Spielfläche hinterlegen
   fill(169, 169, 169, 50); //Farbe 50% durchsichtig
-  rect(270, 300, 460, 600); //25 auf 31, dunkle Spielfläche
-  pop();
-
-
+  rect(bg_x_mid, bg_y_mid, 460, 600); //25 auf 31, dunkle Spielfläche
  
   //Anzeige für nächsten Block, und Punktzahl
-  push();
   textSize(20);
   fill(255);
-  text("NEXT", 520, 150);//
-  text("SCORE", 520, 100);
-  text(score, 520, 125);
-  pop();
+  text("SCORE", bg_x_mid+250, bg_y_mid-200); //vorher x520, y100
+  text(score, bg_x_mid+250, bg_y_mid-175); //y125
+  text("NEXT", bg_x_mid+250, bg_y_mid-150); //y150
+ 
+  // rect(x_min, y_min, 20, 20); //stein 1 links oben
  
   //Wemm der Timer für red ausgelöst wurde und trigger auf true
   //rote Augen zeichnen
   if(trigger_red === true) {
     // scale*0,5;
-    image(redeyes,320,200, 50, 30);
+    image(redeyes, 250, 200, 50, 30);
   }
   //gleiches für die gelben Augen
   if(trigger_yellow === true) {
-    image(yelloweyes,1450,200, 50,30);
+    image(yelloweyes, 1010, 200, 50, 30);
   }
-   
+    
   //Startdialog
   if (started === 0) {
     fill(169, 169, 169);
-    rect(270, 300, 200, 50); //Box für Startknopf
+    rect(bg_x_mid, bg_y_mid, 200, 50); //Box für Startknopf
     fill(255);
-    text("START", 255, 305);
+    text("START", 633, 460);
   }
   //Spiel läuft
   else if(started === 1) {
-    let changed_next_x = (570-10)/20;
-    let changed_next_y = (210-10)/20;
+    let changed_next_x = 560/20; 
+    let changed_next_y = 200/20;
     let next_blockdata = drawBlocks(next_block, changed_next_x, changed_next_y, 0); //0 ersetzt playing_angle
     let next_block_positions = next_blockdata[0];
     let next_block_colors = next_blockdata[1];
     drawRects(next_block_positions, next_block_colors);
-   
+    
     //Bereits gefallene Blöcke aus collide[] abrufen und zeichnen
     //höher gesetzt, da neuer Block bei Game Over drübergezeichnet wird
     for (let j = 0; j < collide.length; j++){
@@ -122,21 +88,22 @@ function draw() {
         }
       }
     }
- 
+  
     //Koordinaten umrechnen damit Blöcke leichter gezeichnet werden können
     //drawBlocks() aufrufen um zu wählen welcher Block gezeichnet wird
     //und dann abwarten welche Koordinaten und Farben zurückkommen
     //mit den Koordinaten und Farben dann drawRects() zeichnen lassen
-    let changed_coords_x = (x-30)/20;
-    let changed_coords_y = (y-10)/20;
+    let changed_coords_x = (x-x_min)/20;
+    let changed_coords_y = (y-y_min)/20;
+    console.log(x+" "+x_min+" "+changed_coords_x+" "+y+" "+y_min+" "+changed_coords_y);
     let blockdata = drawBlocks(playing_block, changed_coords_x, changed_coords_y, playing_angle);
     let plyaing_block_positions = blockdata[0];
     let plyaing_block_colors = blockdata[1];
     drawRects(plyaing_block_positions, plyaing_block_colors);
- 
+  
     //Kollision für nächste Bewegung prüfen
     checkCollision(changed_coords_x, changed_coords_y, playing_angle);
-     
+      
     //Wenn feststeht das Block nicht mehr weiter fallen kann (nachdem es
     //Funktion advance() nochmal versucht hat) Block fixieren lassen durch
     //fixBlocks() und mit checkCompletion() prüfen ob Reihe komplett
@@ -144,18 +111,18 @@ function draw() {
       fixBlocks(plyaing_block_positions, plyaing_block_colors);
       checkCompletion();
       playing_angle = 0;
-      y = 90;
-      x = 90;
- 
+      x = 640;
+      y = 200;
+  
       //nächsten Block wählen
       playing_block = next_block;
       next_block = random(blocks);
-      let changed_coords_goc_x = (x-30)/20;
-      let changed_coords_goc_y = (y-10)/20;
+      let changed_coords_goc_x = (x-x_min)/20;
+      let changed_coords_goc_y = (y-y_min)/20;
       let blockdata_goc = drawBlocks(playing_block, changed_coords_goc_x, changed_coords_goc_y, playing_angle);
       let plyaing_block_positions_goc = blockdata_goc[0];
       let plyaing_block_colors_goc = blockdata_goc[1];
- 
+  
       //und Game Over Kollision prüfen
       for(let i = 0; i < (plyaing_block_positions_goc.length-1); i+=2){
         let goc_x = plyaing_block_positions_goc[i];
@@ -173,7 +140,7 @@ function draw() {
           move_ok = true;
         }
       }
-       
+ 
       block_landed = false;
     }
   } //if(started === 1) ende
@@ -194,18 +161,18 @@ function draw() {
       }
     }
     fill(169, 169, 169);
-    rect(270, 250, 200, 50); //Box für Game Over
-    rect(270, 300, 200, 50); //Box für Startknopf
+    rect(660, 400, 200, 50); //Box für Game Over (270, 250, 200, 50)
+    rect(660, 450, 200, 50); //Box für Startknopf (270, 300, 200, 50)
     fill(255);
-    text("GAME OVER", 235, 255);
-    text("RESTART", 245, 305);
+    text("GAME OVER", 600, 410); //235, 255
+    text("RESTART", 600, 460); //245, 305
   }
 } //draw ende
- 
+  
 //wenn Maus geklickt wird für Spielstart
 function mouseClicked() {
-  //und im Button ist
-  if(mouseX >=170 && mouseX <=370 && mouseY >= 275 && mouseY <= 325 && (started === 0 || started === 2)) {
+  //und im Button ist -> (660, 450, 200, 50) = Box für Startknopf
+  if(mouseX >=560 && mouseX <=760 && mouseY >= 400 && mouseY <= 500 && (started === 0 || started === 2)) {
     started = 1;
     playing_block = random(blocks);
     next_block = random(blocks);
@@ -280,18 +247,18 @@ function mouseClicked() {
       [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
     ];
     playing_angle = 0;
-    y = 90;
-    x = 90;
+    x = 640;
+    y = 200;
     move_ok = true;
     block_landed = false;
   }
 }
- 
+  
 //reference: Nintendo-Online.de Tetris Figuren Vorlage
- 
+  
 //Funktionen errechnen auf das collide Array bezogen wo
 //Rechtecke gezeichnet werden sollen
-   
+    
 function Q(changed_x, changed_y, angle) {
   let playing_colors = [];
   let playing_coords = [];
@@ -301,11 +268,11 @@ function Q(changed_x, changed_y, angle) {
   playing_colors.push(block_color_1);
   playing_colors.push(block_color_2);
   playing_colors.push(block_color_3);
-  
+   
   playing_coords.push(changed_x, changed_y, changed_x+1, changed_y, changed_x, changed_y+1, changed_x+1, changed_y+1);
   return [playing_coords, playing_colors];
 }
-   
+    
 function T(changed_x, changed_y, angle) {
   let playing_colors = [];
   let playing_coords = [];
@@ -315,7 +282,7 @@ function T(changed_x, changed_y, angle) {
   playing_colors.push(block_color_1);
   playing_colors.push(block_color_2);
   playing_colors.push(block_color_3);
-    
+     
   if(angle === 0){
     playing_coords.push(changed_x-1, changed_y, changed_x, changed_y, changed_x+1, changed_y, changed_x, changed_y+1);
   }
@@ -330,7 +297,7 @@ function T(changed_x, changed_y, angle) {
   }
   return [playing_coords, playing_colors];
 }
-   
+    
 function L(changed_x, changed_y, angle) {
   let playing_colors = [];
   let playing_coords = [];
@@ -340,7 +307,7 @@ function L(changed_x, changed_y, angle) {
   playing_colors.push(block_color_1);
   playing_colors.push(block_color_2);
   playing_colors.push(block_color_3);
-  
+   
   if(angle === 0){
     playing_coords.push(changed_x-2, changed_y, changed_x-1, changed_y, changed_x, changed_y, changed_x, changed_y+1);
   }
@@ -355,7 +322,7 @@ function L(changed_x, changed_y, angle) {
   }
   return [playing_coords, playing_colors];
 }
-   
+    
 function I(changed_x, changed_y, angle) {
   let playing_colors = [];
   let playing_coords = [];
@@ -365,7 +332,7 @@ function I(changed_x, changed_y, angle) {
   playing_colors.push(block_color_1);
   playing_colors.push(block_color_2);
   playing_colors.push(block_color_3);
-  
+   
   if(angle === 0){
     playing_coords.push(changed_x-1, changed_y, changed_x, changed_y, changed_x+1, changed_y, changed_x+2, changed_y);
   }
@@ -380,7 +347,7 @@ function I(changed_x, changed_y, angle) {
   }
   return [playing_coords, playing_colors];
 }
-   
+    
 function Z(changed_x, changed_y, angle) {
   let playing_colors = [];
   let playing_coords = [];
@@ -390,7 +357,7 @@ function Z(changed_x, changed_y, angle) {
   playing_colors.push(block_color_1);
   playing_colors.push(block_color_2);
   playing_colors.push(block_color_3);
-  
+   
   if(angle === 0){
     playing_coords.push(changed_x-1, changed_y, changed_x, changed_y, changed_x, changed_y+1, changed_x+1, changed_y+1);
   }
@@ -405,7 +372,7 @@ function Z(changed_x, changed_y, angle) {
   }
   return [playing_coords, playing_colors];
 }
-  
+   
 //mirrored Z/L
 function mZ(changed_x, changed_y, angle) {
   let playing_colors = [];
@@ -416,7 +383,7 @@ function mZ(changed_x, changed_y, angle) {
   playing_colors.push(block_color_1);
   playing_colors.push(block_color_2);
   playing_colors.push(block_color_3);
-  
+   
   if(angle === 0){
     playing_coords.push(changed_x-1, changed_y+1, changed_x, changed_y, changed_x, changed_y+1, changed_x+1, changed_y);
   }
@@ -431,7 +398,7 @@ function mZ(changed_x, changed_y, angle) {
   }
   return [playing_coords, playing_colors];
 }
-   
+    
 function mL(changed_x, changed_y, angle) {
   let playing_colors = [];
   let playing_coords = [];
@@ -441,7 +408,7 @@ function mL(changed_x, changed_y, angle) {
   playing_colors.push(block_color_1);
   playing_colors.push(block_color_2);
   playing_colors.push(block_color_3);
-  
+   
   if(angle === 0){
     playing_coords.push(changed_x-2, changed_y, changed_x-1, changed_y, changed_x, changed_y, changed_x, changed_y-1);
   }
@@ -456,7 +423,7 @@ function mL(changed_x, changed_y, angle) {
   }
   return [playing_coords, playing_colors];
 }
-  
+   
 //Zeitgesteuerte Funktion
 //Funktion wird alle interval = 250 = 0,25 Sekunden aufgerufen
 //und lässt Block 20 Pixel fallen oder sorgt bei Kollision
@@ -471,7 +438,7 @@ function advance() {
     block_landed = true;
   }
 }
- 
+  
 //Wechselt den Modus für die Anzeige von rot
 function show_red() {
   if(trigger_red === false) {
@@ -481,7 +448,7 @@ function show_red() {
     trigger_red = false;
   }
 }
- 
+  
 //Wechselt den Modus für die Anzeige von gelb
 function show_yellow() {
   if(trigger_yellow === false) {
@@ -491,7 +458,7 @@ function show_yellow() {
     trigger_yellow = false;
   }
 }
-  
+   
 //Anhand des Wertes in block entscheiden was gezeichnet wird,
 //Koordinaten weitergeben und auf Zeichenpunkte und Farbe warten
 //die in block_pos_col gespeichert werden
@@ -528,7 +495,7 @@ function drawBlocks(block, changed_x, changed_y, angle) {
   }
   return block_pos_col;
 }
-  
+   
 //Funktion nimmt echte Koordinaten und Farbe und
 //zeichnet einfach Rechtecke
 function drawRects(rect_places, rect_colors) {
@@ -536,19 +503,19 @@ function drawRects(rect_places, rect_colors) {
   color2 = rect_colors[1];
   color3 = rect_colors[2];
   for (let i = 0; i < rect_places.length-1; i+=2){
-    rect_x = rect_places[i];
-    let x_real = (rect_x*20)+30;
-    rect_y = rect_places[i+1];
-    let y_real = (rect_y*20)+10;
+    let rect_x = rect_places[i];
+    let x_real = (rect_x*20)+x_min;
+    let rect_y = rect_places[i+1];
+    let y_real = (rect_y*20)+y_min;
     fill(color1, color2, color3);
     rect(x_real, y_real, 20, 20);
   }
 }
-  
+   
 //Auf Kollision prüfen
 function checkCollision(changed_x, changed_y, angle){
   let collision_part = [];
-  
+   
   if(playing_block.localeCompare("Q") === 0)
   {
     collision_part.push(changed_x, changed_y+2, changed_x+1, changed_y+2);
@@ -637,7 +604,7 @@ function checkCollision(changed_x, changed_y, angle){
       collision_part.push(changed_x-1, changed_y+1, changed_x, changed_y+3);
     }
   }
-    
+     
   for(let i = 0; i < (collision_part.length-1); i+=2){
     let collide_x = collision_part[i];
     let collide_y = collision_part[i+1];
@@ -649,13 +616,13 @@ function checkCollision(changed_x, changed_y, angle){
     }
   }
 }
-  
+   
 function keyPressed() {
   if (keyCode === UP_ARROW) {
-    let changed_coords_x = (x-30)/20;
-    let changed_coords_y = (y-10)/20;
+    let changed_coords_x = (x-x_min)/20;
+    let changed_coords_y = (y-y_min)/20;
     let testangle = playing_angle+1;
-  
+   
     //lässt sich alle rect-Koordinaten geben für einen Winkel weiter zum testen
     //schlägt Testrotation wegen Kollision fehl, wird nicht rotiert
     let blockdata = drawBlocks(playing_block, changed_coords_x, changed_coords_y, testangle);
@@ -671,7 +638,7 @@ function keyPressed() {
         rotate_ok = false;
       }
     }
-      
+       
     //ist der Test geglückt wird Winkel eins weiter gedreht
     if(rotate_ok === true){
       playing_angle++;
@@ -682,13 +649,13 @@ function keyPressed() {
   }
   //Block nach links schieben und neu zeichnen falls keine Kollision links ist
   else if (keyCode === LEFT_ARROW) {
-    let changed_coords_x = (x-30)/20;
-    let changed_coords_y = (y-10)/20;
+    let changed_coords_x = (x-x_min)/20;
+    let changed_coords_y = (y-y_min)/20;
     let move_left = checkCollisionXLeft(changed_coords_x, changed_coords_y, playing_angle);
     if(move_left === true){
       x-=20;
       //console.log("x "+x);
-  
+   
       let blockdata = drawBlocks(playing_block, changed_coords_x, changed_coords_y, playing_angle);
       let plyaing_block_positions = blockdata[0];
       let plyaing_block_colors = blockdata[1];
@@ -711,12 +678,12 @@ function keyPressed() {
   }
   //Block nach rechts schieben und neu zeichnen falls keine Kollision rechts
   else if (keyCode === RIGHT_ARROW) {
-    let changed_coords_x = (x-30)/20;
-    let changed_coords_y = (y-10)/20;
+    let changed_coords_x = (x-x_min)/20;
+    let changed_coords_y = (y-y_min)/20;
     let move_right = checkCollisionXRight(changed_coords_x, changed_coords_y, playing_angle);
     if(move_right === true){
       x+=20;
-  
+   
       let blockdata = drawBlocks(playing_block, changed_coords_x, changed_coords_y, playing_angle);
       let plyaing_block_positions = blockdata[0];
       let plyaing_block_colors = blockdata[1];
@@ -749,7 +716,7 @@ function keyPressed() {
     clearInterval(interval);
   }*/
 }
- 
+  
 //Funktion wird aufgerufen wenn eine Taste losgelassen wird
 function keyReleased() {
   //Wird Pfeil Unten losgelassen dann wird der schnelle Falltimer gestoppt
@@ -760,11 +727,11 @@ function keyReleased() {
     interval = window.setInterval(advance, timer);
   }
 }
- 
+  
 //Wenn Pfeil links gedrückt wird, checkt Funktion auf Kollision links
 function checkCollisionXLeft(changed_x, changed_y, angle) {
   let collision_part = [];
-  
+   
   if(playing_block.localeCompare("Q") === 0)
   {
     collision_part.push(changed_x-1, changed_y+1, changed_x-1, changed_y);
@@ -866,11 +833,11 @@ function checkCollisionXLeft(changed_x, changed_y, angle) {
   }
   return move_left;
 }
-  
+   
 //Wenn Pfeil rechts gedrückt wird, checkt Funktion auf Kollision rechts
 function checkCollisionXRight(changed_x, changed_y, angle) {
   let collision_part = [];
-  
+   
   if(playing_block.localeCompare("Q") === 0)
   {
     collision_part.push(changed_x+2, changed_y+1, changed_x+2, changed_y);
@@ -972,7 +939,7 @@ function checkCollisionXRight(changed_x, changed_y, angle) {
   }
   return move_right;
 }
-   
+    
 //Funktion trägt neue Blöcke in collide mit 1 an allen Positionen
 //ein wo Rechtecke sitzen und in fallen_blocks[] die rect-Farbe
 function fixBlocks(block_coords, color_array) {
@@ -983,7 +950,7 @@ function fixBlocks(block_coords, color_array) {
     fallen_blocks[rect_y][rect_x] = color_array;
   }
 }
-  
+   
 //Prüft auf Komplettierung, Collide wird komplett durchlaufen
 //und Zeilen die nicht die Summe 10 haben werden in ein temporäres Array
 //geschrieben, Zeilen mit Summe 10 sind komplett und werden "vergessen"
@@ -1057,7 +1024,7 @@ function checkCompletion(){
     [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
     [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
   ];
-  
+   
   //Zeilensumme aufsummieren
   for (let j = collide.length-1; j >= 0; j--){
     let row = collide[j];
@@ -1085,7 +1052,7 @@ function checkCompletion(){
       score+=100;
     }
   }
-  
+   
   //Temproräre Arrays zurückschreiben
   for (let j = 0; j < collide.length; j++){
     let temp_row = collide_temp[j];
@@ -1093,7 +1060,7 @@ function checkCompletion(){
     collide[j] = temp_row;
     fallen_blocks[j] = temp_color;
   }
-  
+   
   //und neu Zeichnen lassen
   for (let j = 0; j < collide.length; j++){
     let row = collide[j];
